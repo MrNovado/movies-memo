@@ -1,28 +1,47 @@
 import { z } from 'zod';
 import {
-  type MovieSearchResult, //
-  movieSearchResultSchema,
-} from 'shared';
+  type TMDBMovieSearchResult, //
+  tmdbMovieSearchResultSchema,
+} from './tmbd.schema';
+
+const options = {
+  method: 'GET',
+  headers: {
+    accept: 'application/json',
+    Authorization: `Bearer ${import.meta.env.MAIN_VITE_TMDB_API_READ_TOKEN}`,
+  },
+};
 
 const findMovieResponse = z.object({
-  results: z.array(movieSearchResultSchema),
+  results: z.array(tmdbMovieSearchResultSchema),
 });
 
 export const TMDB = {
-  findMovie: async (query: string): Promise<Array<MovieSearchResult>> => {
+  findMovie: async (query: string): Promise<Array<TMDBMovieSearchResult>> => {
     try {
-      const response = await fetch(`https://api.themoviedb.org/3/search/movie?query=${query}`, {
-        method: 'GET',
-        headers: {
-          accept: 'application/json',
-          Authorization: `Bearer ${import.meta.env.MAIN_VITE_TMDB_API_READ_TOKEN}`,
-        },
-      });
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/movie?query=${query}`,
+        options,
+      );
 
       const raw: unknown = await response.json();
       return findMovieResponse.parse(raw).results;
-    } catch (error) {
-      throw new Error('@tmdb/findMovie/error');
+    } catch {
+      return [];
+    }
+  },
+
+  findTV: async (query: string): Promise<Array<TMDBMovieSearchResult>> => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/tv?query=${query}`,
+        options,
+      );
+
+      const raw: unknown = await response.json();
+      return findMovieResponse.parse(raw).results;
+    } catch {
+      return [];
     }
   },
 };
