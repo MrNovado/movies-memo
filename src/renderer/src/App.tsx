@@ -4,34 +4,16 @@ import {
   createSignal,
   For,
 } from 'solid-js';
-import { z } from 'zod';
-import {
-  IPC_EVENTS, //
-  type MovieSearchResult,
-  movieSearchResultSchema,
-} from 'shared';
+import { IPC, type MovieSearchResult } from 'shared';
 
-const moviesSchema = z.array(movieSearchResultSchema);
-
+const findMovieIPC = IPC.findMovie.client(window.electron.ipcRenderer);
 const findMovie = async (query: string): Promise<Array<MovieSearchResult>> => {
-  window.electron.ipcRenderer.removeAllListeners(IPC_EVENTS.findMovieError);
-  window.electron.ipcRenderer.removeAllListeners(IPC_EVENTS.findMovieResp);
+  findMovieIPC.disposeSubs();
   return new Promise((res) => {
     console.log('findMovie', query);
-
-    const resolve = (v) => {
-      res(v);
-    };
-
-    window.electron.ipcRenderer.send(IPC_EVENTS.findMovie, query);
-    window.electron.ipcRenderer.once(IPC_EVENTS.findMovieError, () => resolve([]));
-    window.electron.ipcRenderer.once(IPC_EVENTS.findMovieResp, (_, ...args) => {
-      try {
-        resolve(moviesSchema.parse(JSON.parse(args[0])));
-      } catch {
-        resolve([]);
-      }
-    });
+    findMovieIPC.send(query);
+    findMovieIPC.xError('once', () => res([]));
+    findMovieIPC.xSuccess('once', res);
   });
 };
 
