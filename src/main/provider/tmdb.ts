@@ -27,7 +27,7 @@ export const TMDB = {
       const raw: unknown = await response.json();
       return findMovieResponse.parse(raw).results;
     } catch {
-      return [];
+      throw new Error('@/TMDB/findMovie');
     }
   },
 
@@ -41,7 +41,7 @@ export const TMDB = {
       const raw: unknown = await response.json();
       return findMovieResponse.parse(raw).results;
     } catch {
-      return [];
+      throw new Error('@/TMDB/findTV');
     }
   },
 };

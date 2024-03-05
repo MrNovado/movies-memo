@@ -21,8 +21,8 @@ export const registerIpc = (ipcMain: Electron.IpcMain): void => {
       console.log(IPC_EVENTS.findMovieResp, results);
       event.reply(IPC_EVENTS.findMovieResp, JSON.stringify(results));
     } catch {
-      console.log(IPC_EVENTS.findMovieResp, '[]');
-      event.reply(IPC_EVENTS.findMovieResp, '[]');
+      console.log(IPC_EVENTS.findMovieError);
+      event.reply(IPC_EVENTS.findMovieError);
     }
   });
 };

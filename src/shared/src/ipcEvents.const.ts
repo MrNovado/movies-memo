@@ -1,4 +1,5 @@
 export const IPC_EVENTS = {
-  findMovie: '@ipc.findMovie',
-  findMovieResp: '@ipc.findMovie!',
+  findMovie: '@ipc.FM',
+  findMovieResp: '@ipc.FM.S',
+  findMovieError: '@ipc.FM.E',
 };

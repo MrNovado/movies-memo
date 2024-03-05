@@ -13,18 +13,27 @@ import {
 
 const moviesSchema = z.array(movieSearchResultSchema);
 
-const findMovie = async (query: string): Promise<Array<MovieSearchResult>> =>
-  new Promise((res) => {
+const findMovie = async (query: string): Promise<Array<MovieSearchResult>> => {
+  window.electron.ipcRenderer.removeAllListeners(IPC_EVENTS.findMovieError);
+  window.electron.ipcRenderer.removeAllListeners(IPC_EVENTS.findMovieResp);
+  return new Promise((res) => {
+    console.log('findMovie', query);
+
+    const resolve = (v) => {
+      res(v);
+    };
+
     window.electron.ipcRenderer.send(IPC_EVENTS.findMovie, query);
+    window.electron.ipcRenderer.once(IPC_EVENTS.findMovieError, () => resolve([]));
     window.electron.ipcRenderer.once(IPC_EVENTS.findMovieResp, (_, ...args) => {
-      const raw: unknown = JSON.parse(args[0]);
       try {
-        res(moviesSchema.parse(raw));
+        resolve(moviesSchema.parse(JSON.parse(args[0])));
       } catch {
-        res(raw as Array<MovieSearchResult>);
+        resolve([]);
       }
     });
   });
+};
 
 const App: Component = () => {
   const [queryInp, setQueryInp] = createSignal<string>('');
